@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نادي الدرعية — قسم الرصد والتفاعل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5EDDF;              /* بيج فاتح رملي */
+    --bg-2:#E8DBC5;
+    --panel:#FFFFFF;
+    --panel-2:#FAF3E5;
+    --line:#D8C9AD;
+    --text:#2D1A0E;            /* بني غامق للنصوص */
+    --text-2:#4A3020;
+    --muted:#8A7355;
+    --clay:#B87D5A;            /* الطيني الترابي - اللون الرئيسي */
+    --clay-dark:#8B5A3C;
+    --clay-light:#D4A574;      /* الذهبي من الشعار */
+    --green:#1E3A32;           /* الأخضر الغامق التاريخي */
+    --green-light:#2E5449;
+    --gold:#D4A574;
+    --pos:#4A7A5E;             /* أخضر هادئ للإيجابي */
+    --warn:#C89A5A;
+    --neg:#9E4A3E;
+    --radius:16px;
+    --shadow:0 2px 12px rgba(45, 26, 14, 0.08);
+    --shadow-lg:0 4px 20px rgba(45, 26, 14, 0.15);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Readex Pro",-apple-system,"Segoe UI",Tahoma,sans-serif;
+    overflow:hidden;
+    display:flex;flex-direction:column;
+    position:relative;
+  }
+  /* تدرجات ترابية دافئة */
+  body::before{
+    content:"";
+    position:fixed;
+    top:-20%;right:-15%;
+    width:60%;height:60%;
+    background:radial-gradient(circle, rgba(184, 125, 90, 0.15) 0%, transparent 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+  body::after{
+    content:"";
+    position:fixed;
+    bottom:-25%;left:-15%;
+    width:55%;height:55%;
+    background:radial-gradient(circle, rgba(30, 58, 50, 0.08) 0%, transparent 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+  header, .stage{position:relative;z-index:1}
+
+  header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 40px 14px;
+    flex-shrink:0;
+  }
+  .brand{display:flex;align-items:center;gap:16px}
+  .brand-mark{
+    height:72px;width:72px;
+    background:var(--green);
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--shadow);
+    padding:8px;
+  }
+  .brand-mark img{height:100%;width:auto;display:block;object-fit:contain}
+  .brand h1{font-size:24px;font-weight:700;letter-spacing:.2px;color:var(--green)}
+  .brand small{
+    display:block;font-weight:500;font-size:12px;margin-top:4px;
+    color:var(--clay);letter-spacing:.5px;
+    font-family:"Helvetica Neue","Segoe UI",sans-serif;
+    direction:ltr;text-align:right;
+  }
+  .brand small b{color:#F05D2A;font-weight:800}
+  .clockbox{text-align:left}
+  #clock{font-size:30px;font-weight:300;font-variant-numeric:tabular-nums;letter-spacing:1px;line-height:1.2;color:var(--green)}
+  #dateline{color:var(--muted);font-size:13px;margin-top:4px;line-height:1.4}
+  .live{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:8px 18px;font-size:14px;color:var(--muted);
+    box-shadow:var(--shadow);
+  }
+  .live-dot{width:9px;height:9px;border-radius:50%;background:var(--clay);animation:blink 2s infinite}
+  #fsBtn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:999px;padding:8px 18px;font-size:14px;color:var(--muted);
+    cursor:pointer;font-family:inherit;transition:color .2s,border-color .2s;
+    box-shadow:var(--shadow);
+  }
+  #fsBtn:hover{color:var(--green);border-color:var(--clay)}
+  body.is-fullscreen #fsBtn{opacity:0;pointer-events:none;transition:opacity .4s}
+  body.is-fullscreen:hover #fsBtn{opacity:.6;pointer-events:auto}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+  .stage{flex:1;position:relative;padding:6px 40px 12px;min-height:0}
+  .scene{
+    position:absolute;inset:6px 40px 12px;
+    display:grid;gap:16px;
+  }
+
+  .card{
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 22px;
+    display:flex;flex-direction:column;
+    min-height:0;
+    box-shadow:var(--shadow);
+  }
+  .card .label{color:var(--muted);font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+  .kpi{font-size:42px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums;margin-top:8px;color:var(--green)}
+  .delta{font-size:14px;margin-top:4px;display:flex;align-items:center;gap:6px;font-weight:600}
+  .up{color:var(--pos)} .down{color:var(--neg)}
+
+  .kpi-card{position:relative;overflow:hidden}
+  .kpi-card::before{
+    content:"";
+    position:absolute;
+    top:0;right:0;
+    width:60px;height:60px;
+    background:linear-gradient(135deg, var(--clay-light) 0%, transparent 70%);
+    border-radius:0 var(--radius) 0 100%;
+    opacity:0.4;
+  }
+
+  #scene1{grid-template-columns:repeat(4,1fr);grid-template-rows:auto 1.15fr 1fr}
+
+  .cities-card{grid-column:1;grid-row:2;overflow:hidden;display:flex;flex-direction:column}
+  .cities-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+  .city-row{display:flex;align-items:center;gap:10px;animation:kwIn .5s ease both}
+  .city-name{font-size:14px;color:var(--text);font-weight:600;min-width:70px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .city-bar{flex:1;height:9px;background:var(--bg-2);border-radius:999px;overflow:hidden}
+  .city-bar i{display:block;height:100%;border-radius:999px;width:0;transition:width 1s ease}
+  .city-count{font-size:13px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;min-width:25px;text-align:end}
+  .eng-mini{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+  .eng-mini-label{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600}
+  .eng-mini svg{width:100%;height:70px;display:block}
+
+  .hashtags-card{grid-column:2;grid-row:2;overflow:hidden}
+  .hashtags-list{margin-top:14px;flex:1;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+  .ht-row{display:flex;align-items:center;gap:12px;animation:kwIn .5s ease both}
+  .ht-name{font-size:13px;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+  .ht-bar{flex:1;height:10px;background:var(--bg-2);border-radius:999px;overflow:hidden}
+  .ht-bar i{display:block;height:100%;border-radius:999px;width:0;transition:width 1s ease}
+  .ht-count{font-size:14px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums;min-width:30px;text-align:end}
+
+  .members-card{
+    grid-column:3;grid-row:2;overflow:hidden;
+    display:flex;flex-direction:column;
+    background:linear-gradient(135deg, rgba(30,58,50,0.9) 0%, rgba(30,58,50,0.75) 100%);
+    border-color:var(--green);
+    box-shadow:var(--shadow-lg);
+    color:#F5EDDF;
+  }
+  .members-card .label{color:rgba(245,237,223,0.7)}
+  .mem-big{
+    font-size:52px;font-weight:800;line-height:1;
+    color:var(--clay-light);
+    margin-top:14px;
+    font-variant-numeric:tabular-nums;
+    letter-spacing:-2px;
+    animation:kwIn .8s ease both;
+  }
+  .mem-sub{color:rgba(245,237,223,0.7);font-size:13px;font-weight:500;margin-top:6px}
+  .mem-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:auto;
+    background:rgba(212,165,116,0.2);
+    color:var(--clay-light);
+    padding:6px 14px;border-radius:999px;
+    font-size:12px;font-weight:700;
+    border:1px solid rgba(212,165,116,0.4);
+    align-self:flex-start;
+  }
+
+  .sentiment-card{grid-column:4;grid-row:2;align-items:stretch}
+  .sentiment-card .gauge-wrap{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    margin-top:8px;
+  }
+  .gauge{position:relative;width:min(150px,68%);aspect-ratio:1}
+  .gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .gauge circle{fill:none;stroke-width:12;stroke-linecap:round}
+  .gauge .track{stroke:var(--bg-2)}
+  .gauge .val{stroke:var(--pos);transition:stroke-dashoffset 1.2s ease}
+  .gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .gauge-center b{font-size:32px;font-weight:800;color:var(--green)}
+  .gauge-center span{color:var(--muted);font-size:13px;font-weight:600}
+  .senti-legend{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+  .senti-legend div{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);font-weight:600}
+  .dot{width:8px;height:8px;border-radius:50%}
+
+  .feed-card{grid-column:1 / 3;grid-row:3;overflow:hidden}
+  .feed-list{margin-top:12px;display:flex;flex-direction:column;flex:1;overflow:hidden}
+  .feed-item{
+    padding:11px 0;border-bottom:1px solid var(--line);
+    display:flex;flex-direction:column;gap:4px;
+    animation:feedIn .8s ease;
+  }
+  .feed-item:last-child{border-bottom:none}
+  .feed-item .fi-text{font-size:14px;line-height:1.7;color:var(--text)}
+  .feed-item .fi-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:center;margin-top:2px}
+  .feed-item .fi-source{color:var(--clay-dark);font-weight:700}
+  .feed-item .fi-dot{color:var(--muted);margin:0 4px;font-weight:400}
+  @keyframes feedIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  @keyframes kwIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+  .toppost{grid-column:3;grid-row:3;overflow:hidden}
+  .src-chip{background:rgba(30,58,50,0.15);border:1px solid var(--green);border-radius:999px;padding:3px 12px;font-size:12px;color:var(--green);font-weight:700}
+  .toppost .post-body{font-size:14px;line-height:1.8;margin-top:12px;flex:1;overflow:hidden;color:var(--text-2);
+    display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical}
+  .post-meta{display:flex;gap:16px;color:var(--muted);font-size:12px;margin-top:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid var(--line);font-weight:600}
+  .post-meta b{color:var(--clay-dark);font-weight:800}
+
+  .platforms-card{grid-column:4;grid-row:3;overflow:hidden}
+  .platform-row{display:flex;align-items:center;gap:12px;margin-top:12px}
+  .platform-row .pname{width:80px;font-size:13px;font-weight:600;color:var(--text)}
+  .bar{flex:1;height:10px;background:var(--bg-2);border-radius:999px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:999px;width:0;transition:width 1.2s ease}
+  .platform-row .pval{width:50px;text-align:left;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;font-weight:700}
+
+  @media (prefers-reduced-motion:reduce){
+    .live-dot{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark"><img id="brandLogo" alt="Diriyah Club"></div>
+    <div>
+      <h1>نادي الدرعية</h1>
+      <small>Powered by <b>tact</b> Digital Marketing</small>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="live"><span class="live-dot"></span> بث مباشر — آخر تحديث <span id="lastupd">قبل ٥ دقائق</span></div>
+    <button id="fsBtn" title="ملء الشاشة">⛶ ملء الشاشة</button>
+  </div>
+  <div class="clockbox">
+    <div id="clock">--:--</div>
+    <div id="dateline"></div>
+  </div>
+</header>
+
+<div class="stage">
+  <section class="scene" id="scene1">
+    <div class="card kpi-card">
+      <div class="label">إجمالي المنشن</div>
+      <div class="kpi" id="kMentions">4,127</div>
+      <div class="delta up">▲ آخر ٣٠ يوم</div>
+    </div>
+    <div class="card kpi-card">
+      <div class="label">الوصول التقديري</div>
+      <div class="kpi" id="kReach">3.4M</div>
+      <div class="delta up">▲ آخر ٣٠ يوم</div>
+    </div>
+    <div class="card kpi-card">
+      <div class="label">التفاعل</div>
+      <div class="kpi" id="kEng">156K</div>
+      <div class="delta up">▲ آخر ٣٠ يوم</div>
+    </div>
+    <div class="card kpi-card">
+      <div class="label">الانطباعات</div>
+      <div class="kpi" id="kViews">2.8M</div>
+      <div class="delta up">▲ آخر ٣٠ يوم</div>
+    </div>
+
+    <div class="card cities-card">
+      <div class="label">📍 أعلى المدن تفاعلاً</div>
+      <div class="cities-list" id="citiesList"></div>
+      <div class="eng-mini">
+        <div class="eng-mini-label">📈 عدد المنشن اليومي — آخر ٣٠ يوم</div>
+        <svg id="engSvg" viewBox="0 0 600 100" preserveAspectRatio="none"></svg>
+      </div>
+    </div>
+
+    <div class="card hashtags-card">
+      <div class="label"># أبرز الهاشتاقات</div>
+      <div class="hashtags-list" id="hashtagsList"></div>
+    </div>
+
+    <div class="card members-card">
+      <div class="label">🏆 إرث النادي</div>
+      <div class="mem-big">50</div>
+      <div class="mem-sub">سنة من العطاء والإنجازات الرياضية</div>
+      <div class="mem-badge">تأسس عام 1976</div>
+    </div>
+
+    <div class="card sentiment-card">
+      <div class="label">المزاج العام للمحادثة</div>
+      <div class="gauge-wrap">
+        <div class="gauge">
+          <svg viewBox="0 0 120 120">
+            <circle class="track" cx="60" cy="60" r="50"/>
+            <circle class="val" id="gaugeVal" cx="60" cy="60" r="50"/>
+          </svg>
+          <div class="gauge-center"><b id="gaugeNum">81٪</b><span>إيجابي</span></div>
+        </div>
+        <div class="senti-legend">
+          <div><span class="dot" style="background:var(--pos)"></span> إيجابي 81٪</div>
+          <div><span class="dot" style="background:var(--warn)"></span> محايد 15٪</div>
+          <div><span class="dot" style="background:var(--neg)"></span> سلبي 4٪</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card feed-card">
+      <div class="label"><span class="live-dot"></span> آخر المنشن</div>
+      <div class="feed-list" id="feedList"></div>
+    </div>
+
+    <div class="card toppost">
+      <div class="label">أعلى منشور تفاعلاً <span class="src-chip">إكس</span></div>
+      <div class="post-body" id="topPostBody">"لحظات لا تُنسى في مباراة نادي الدرعية أمس 🏆 أداء استثنائي من فريقنا، وجمهور رائع دعم بكل حماس. نفتخر بتاريخنا العريق منذ 1976 ونصنع مستقبلاً رياضياً مشرفاً 🧡 #نادي_الدرعية #الدرعية_رياضة"</div>
+      <div class="post-meta">
+        <span>تفاعل <b>12,847</b></span>
+        <span>وصول <b>324K</b></span>
+        <span>@DiriyahClub</span>
+      </div>
+    </div>
+
+    <div class="card platforms-card">
+      <div class="label">توزيع المنشن حسب المنصة</div>
+      <div id="platformRows"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+const LOGO_B64 = "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";
+document.getElementById("brandLogo").src = "data:image/png;base64," + LOGO_B64;
+
+const DATA = {
+  cities: [
+    { name: "الرياض", count: 1642 },
+    { name: "جدة", count: 587 },
+    { name: "الدمام", count: 342 },
+    { name: "الدرعية", count: 298 },
+    { name: "مكة", count: 187 }
+  ],
+  hashtags: [
+    { tag: "#نادي_الدرعية", count: 687 },
+    { tag: "#الدرعية_رياضة", count: 412 },
+    { tag: "#Diriyah_Club", count: 298 },
+    { tag: "#موسم_الرياضة", count: 234 },
+    { tag: "#دوري_روشن", count: 156 }
+  ],
+  platforms: [
+    { name: "إكس (تويتر)", val: 1687, color: "var(--clay-dark)" },
+    { name: "إنستغرام", val: 942, color: "var(--clay)" },
+    { name: "تيك توك", val: 587, color: "var(--green-light)" },
+    { name: "يوتيوب", val: 423, color: "var(--clay-light)" },
+    { name: "لينكدإن", val: 312, color: "var(--muted)" },
+    { name: "فيسبوك", val: 176, color: "var(--warn)" }
+  ],
+  feedItems: [
+    { text: "نادي الدرعية يعلن عن انضمام لاعب دولي جديد لصفوف الفريق الأول للموسم القادم ⚽🧡", platform: "إكس", author: "@DiriyahClub" },
+    { text: "أجواء رائعة في تدريبات فريقنا اليوم استعداداً لمواجهة الجولة القادمة 💪 #نادي_الدرعية", platform: "إنستغرام", author: "@DiriyahClub" },
+    { text: "شرف كبير للفريق بزيارة الأمير للنادي والاطلاع على البنية التحتية الجديدة والمرافق الرياضية", platform: "أخبار", author: "الرياض" },
+    { text: "الف مبروك لفريقنا الفوز في مباراة أمس 🏆 أداء يستحق الفخر، دائماً نصنع التاريخ منذ 1976", platform: "إكس", author: "@sport_fan_ksa" },
+    { text: "افتتاح الأكاديمية الرياضية الجديدة للناشئين في نادي الدرعية — استثمار في أجيال المستقبل", platform: "لينكدإن", author: "@DiriyahCo" },
+    { text: "لحظات من مباراة الديربي التاريخية 🎬 أهداف رائعة وجمهور استثنائي #الدرعية_رياضة", platform: "تيك توك", author: "@DiriyahClub" }
+  ]
+};
+
+function renderCities(){
+  const wrap = document.getElementById("citiesList");
+  const max = Math.max(...DATA.cities.map(c => c.count));
+  const colors = ["var(--clay-dark)", "var(--clay)", "var(--green)", "var(--clay-light)", "var(--muted)"];
+  DATA.cities.forEach((c, i) => {
+    const row = document.createElement("div");
+    row.className = "city-row";
+    row.style.animationDelay = (i * 80) + "ms";
+    row.innerHTML = `
+      <div class="city-name">${c.name}</div>
+      <div class="city-bar"><i style="background:${colors[i]}"></i></div>
+      <div class="city-count">${c.count}</div>
+    `;
+    wrap.appendChild(row);
+    requestAnimationFrame(() => {
+      row.querySelector("i").style.width = ((c.count / max) * 100) + "%";
+    });
+  });
+}
+
+function renderHashtags(){
+  const wrap = document.getElementById("hashtagsList");
+  const max = Math.max(...DATA.hashtags.map(h => h.count));
+  const colors = ["var(--clay-dark)", "var(--green)", "var(--clay)", "var(--clay-light)", "var(--muted)"];
+  DATA.hashtags.forEach((h, i) => {
+    const row = document.createElement("div");
+    row.className = "ht-row";
+    row.style.animationDelay = (i * 100) + "ms";
+    row.innerHTML = `
+      <div class="ht-name" title="${h.tag}">${h.tag}</div>
+      <div class="ht-bar"><i style="background:${colors[i]}"></i></div>
+      <div class="ht-count">${h.count}</div>
+    `;
+    wrap.appendChild(row);
+    requestAnimationFrame(() => {
+      row.querySelector("i").style.width = ((h.count / max) * 100) + "%";
+    });
+  });
+}
+
+function renderPlatforms(){
+  const wrap = document.getElementById("platformRows");
+  const max = Math.max(...DATA.platforms.map(p => p.val));
+  DATA.platforms.forEach((p, i) => {
+    const row = document.createElement("div");
+    row.className = "platform-row";
+    row.innerHTML = `
+      <div class="pname">${p.name}</div>
+      <div class="bar"><i style="background:${p.color}"></i></div>
+      <div class="pval">${p.val.toLocaleString("en-US")}</div>
+    `;
+    wrap.appendChild(row);
+    requestAnimationFrame(() => {
+      row.querySelector("i").style.width = ((p.val / max) * 100) + "%";
+    });
+  });
+}
+
+function renderFeed(){
+  const list = document.getElementById("feedList");
+  const items = window._feedItems || DATA.feedItems;
+  const shown = items.slice(0, 5);
+  list.innerHTML = shown.map(it => `
+    <div class="feed-item">
+      <div class="fi-text">${it.text}</div>
+      <div class="fi-meta"><span class="fi-source">${it.platform} <span class="fi-dot">·</span> ${it.author}</span></div>
+    </div>
+  `).join("");
+}
+function rotateFeed(){
+  if(!window._feedItems) window._feedItems = [...DATA.feedItems];
+  window._feedItems.push(window._feedItems.shift());
+  renderFeed();
+}
+setInterval(rotateFeed, 12000);
+
+function drawGauge(){
+  const c = document.getElementById("gaugeVal");
+  const L = 2 * Math.PI * 50;
+  c.style.strokeDasharray = L;
+  requestAnimationFrame(() => { c.style.strokeDashoffset = L * (1 - 81/100); });
+}
+
+function drawEngagementTrend(){
+  const svg = document.getElementById("engSvg");
+  const values = [85, 102, 94, 118, 138, 128, 156, 178, 152, 189, 208, 184, 218, 202, 248, 232, 271, 254, 296, 318, 292, 342, 328, 368, 394, 376, 418, 402, 445, 468];
+  const W = 600, H = 100, pad = 6;
+  const max = Math.max(...values) * 1.15;
+  const step = (W - pad*2) / (values.length - 1);
+  const pts = values.map((v, i) => [pad + i*step, H - pad - (v/max)*(H - pad*2)]);
+  const line = pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  const area = line + ` L${pts[pts.length-1][0].toFixed(1)},${H} L${pts[0][0].toFixed(1)},${H} Z`;
+  svg.innerHTML = `
+    <defs><linearGradient id="engFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B87D5A" stop-opacity=".4"/>
+      <stop offset="1" stop-color="#B87D5A" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#engFill)"/>
+    <path d="${line}" fill="none" stroke="#8B5A3C" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+  `;
+}
+
+(function(){
+  const btn = document.getElementById("fsBtn");
+  function goFull(){
+    const el = document.documentElement;
+    (el.requestFullscreen || el.webkitRequestFullscreen || function(){}).call(el);
+  }
+  function exitFull(){
+    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+  }
+  btn.addEventListener("click", ()=>{
+    if(document.fullscreenElement || document.webkitFullscreenElement) exitFull();
+    else goFull();
+  });
+  function syncState(){
+    const on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    document.body.classList.toggle("is-fullscreen", on);
+    btn.textContent = on ? "⛶ خروج" : "⛶ ملء الشاشة";
+  }
+  document.addEventListener("fullscreenchange", syncState);
+  document.addEventListener("webkitfullscreenchange", syncState);
+})();
+
+function tick(){
+  const n = new Date();
+  document.getElementById("clock").textContent =
+    n.toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"});
+  document.getElementById("dateline").textContent =
+    n.toLocaleDateString("ar-SA",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+}
+tick(); setInterval(tick, 10000);
+
+renderCities();
+renderHashtags();
+renderPlatforms();
+renderFeed();
+drawGauge();
+drawEngagementTrend();
+</script>
+</body>
+</html>
