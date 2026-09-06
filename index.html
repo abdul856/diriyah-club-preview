@@ -240,6 +240,122 @@
 </style>
 </head>
 <body>
+<!-- Password Gate -->
+<div id="pwGate" style="
+  position:fixed;inset:0;z-index:9999;
+  background:#F5EDDF;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Readex Pro',sans-serif;
+  direction:rtl;
+">
+  <div style="
+    background:#FFFFFF;
+    padding:44px 40px;
+    border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.15);
+    width:100%;max-width:420px;
+    text-align:center;
+    border:1px solid #D8C9AD;
+  ">
+    <div style="
+      width:70px;height:70px;
+      background:#1E3A32;
+      border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 22px;
+      font-size:32px;
+    ">🔐</div>
+    <h2 style="
+      color:#2D1A0E;
+      font-size:22px;font-weight:700;
+      margin-bottom:8px;
+    ">نادي الدرعية</h2>
+    <p style="
+      color:#8A7355;
+      font-size:14px;margin-bottom:26px;line-height:1.6;
+    ">هذه شاشة رصد خاصة<br>أدخل الرقم السري للوصول</p>
+    <input id="pwInput" type="password" placeholder="الرقم السري" style="
+      width:100%;
+      padding:14px 18px;
+      background:#F5EDDF;
+      border:2px solid #D8C9AD;
+      border-radius:10px;
+      color:#2D1A0E;
+      font-size:16px;
+      font-family:inherit;
+      text-align:center;
+      outline:none;
+      margin-bottom:14px;
+      transition:border-color 0.2s;
+    " onfocus="this.style.borderColor='#1E3A32'"
+       onblur="this.style.borderColor='#D8C9AD'">
+    <div id="pwError" style="
+      color:#B85454;font-size:13px;
+      min-height:20px;margin-bottom:8px;
+      opacity:0;transition:opacity 0.3s;
+    ">الرقم السري غير صحيح</div>
+    <button id="pwSubmit" style="
+      width:100%;
+      padding:14px;
+      background:#1E3A32;
+      color:#F5EDDF;
+      border:none;
+      border-radius:10px;
+      font-size:16px;font-weight:700;
+      cursor:pointer;
+      font-family:inherit;
+      transition:transform 0.15s, opacity 0.15s;
+    " onmouseover="this.style.opacity='0.9'"
+       onmouseout="this.style.opacity='1'">دخول</button>
+    <p style="
+      color:#8A7355;
+      font-size:11px;margin-top:22px;
+      letter-spacing:0.5px;direction:ltr;
+    ">Powered by <b style="color:#F05D2A;font-weight:800">tact</b> Digital Marketing</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const CORRECT_PW = "Diriyah@tact1234";
+  const STORAGE_KEY = "dashboardAuth_v1";
+  const gate = document.getElementById("pwGate");
+  const input = document.getElementById("pwInput");
+  const submitBtn = document.getElementById("pwSubmit");
+  const errorEl = document.getElementById("pwError");
+
+  // نتحقق لو دخل قبل
+  if (sessionStorage.getItem(STORAGE_KEY) === "granted") {
+    gate.style.display = "none";
+    return;
+  }
+
+  function tryUnlock() {
+    if (input.value === CORRECT_PW) {
+      sessionStorage.setItem(STORAGE_KEY, "granted");
+      gate.style.opacity = "0";
+      gate.style.transition = "opacity 0.4s";
+      setTimeout(() => gate.style.display = "none", 400);
+    } else {
+      errorEl.style.opacity = "1";
+      input.style.borderColor = "#B85454";
+      input.value = "";
+      setTimeout(() => {
+        errorEl.style.opacity = "0";
+      }, 3000);
+    }
+  }
+
+  submitBtn.addEventListener("click", tryUnlock);
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") tryUnlock();
+  });
+  setTimeout(() => input.focus(), 100);
+})();
+</script>
+<!-- End Password Gate -->
+
+
 
 <header>
   <div class="brand">
